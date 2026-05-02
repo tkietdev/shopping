@@ -195,7 +195,7 @@ function navbar(){
             <ul class="dropdown-menu">';
               $q = Database::query("select * from categories");
     while($r = $q->fetch_array()){
-        $s .= ' <li><a class="dropdown-item" href="#"><div class="1r">'.$r['name'].'</div></a></li>';
+        $s .= ' <li><a class="dropdown-item" href="index.php?id_category=' . $r['id'] . '"><div class="1r">' . $r['name'] . '</div></a></li>';
     }
 
     $s .= '</ul>
@@ -222,22 +222,47 @@ function navbar(){
 }
 function jumbotron(){
     $s = '
-        <div class="bg-primary text-white py-5">
-            <div class="container py-5">
-                <h1>Hot Category & <br>Best products in our store</h1>
-                <p>Trendy Products, Factory Prices, Excellent Service</p>
-                <button class="btn btn-outline-light">Learn more</button>
-                <button class="btn btn-light shadow-0">Purchase now</button>
-            </div>
-        </div>
+    <div class="bg-primary text-white py-5">
+        <div class="container py-5">
+            <h1>';
 
+    if(!isset($_GET['id_category'])){
+        $s .= 'Best category & products <br /> in our store';
+    } else {
+        $id = (int)$_GET['id_category'];
+        // Query đúng bảng categories
+        $q = Database::query("SELECT * FROM categories WHERE id = $id");
+        $s .= 'Best' .$q->fetch_array()['name'].'<br/> in our store';
+        if($r = $q->fetch_array()){
+            $s .= 'Best ' . $r['name'] . ' <br /> in our store';
+        } else {
+            $s .= 'Category not found';
+        }
+    }
+
+    $s .= '</h1>
+            <p>Trendy Products, Factory Prices, Excellent Service</p>
+            <button type="button" class="btn btn-outline-light">
+                Learn more
+            </button>
+            <button type="button" class="btn btn-light shadow-0 text-primary pt-2 border border-white">
+                <span class="pt-1">Purchase now</span>
+            </button>
+        </div>
+    </div>
     ';
+
     echo $s;
 }
 function body(){
     $s = '';
 
-    $q = Database::query("SELECT * FROM categories");
+    if(!isset($_GET['id_category'])){
+        $q = Database::query("SELECT * FROM categories");
+    } else {
+        $id = (int)$_GET['id_category'];
+        $q = Database::query("SELECT * FROM categories WHERE id = $id");
+    }
 
     while($r = $q->fetch_array()){
         $s .= '<section>
@@ -247,10 +272,13 @@ function body(){
                     </header>
                     <div class="row">';
 
-        $q1 = Database::query("SELECT * FROM products WHERE id_category = ".$r['id']);
+        // Query đúng
+        $q1 = Database::query(
+            "SELECT * FROM products
+             WHERE status = true AND id_category = ".$r['id']
+        );
 
         while($r1 = $q1->fetch_array()){
-            if($r['id'] == $r1['id_category'] && $r1['status'] == true)
             $s .= '<div class="col-lg-3 col-md-6 d-flex">
                         <div class="card w-100 my-2 shadow-2-strong">
                             <img src="assets/images/'.$r1['image'].'" class="card-img-top" style="aspect-ratio: 1/1" />
@@ -265,10 +293,11 @@ function body(){
                     </div>';
         }
 
-        $s .= '       </div>
+        $s .= '</div>
                 </div>
             </section>';
     }
+
     echo $s;
 }
 ?>
