@@ -186,7 +186,7 @@ function navbar(){
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 style=margin: 0 auto">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="login.php">Login</a>
+            <a class="nav-link active" aria-current="page" href="login.php">Home</a>
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -397,7 +397,7 @@ function login(){
             <div class="text-center text-lg-start mt-4 pt-2">
             <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
                 style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-            <p class="small fw-bold mt-2 pt-1 mb-0">Don\'t have an account? <a href="#!"
+            <p class="small fw-bold mt-2 pt-1 mb-0">Don\'t have an account? <a href="register.php"
                 class="link-danger">Register</a></p>
             </div>
 
@@ -435,5 +435,145 @@ function splitName($str) { // từ cuối cùng của chuỗi họ tên
     if ($n > 0) {$rs = $word[$n];} // lấy từ cuối cùng
 
 return $rs;
+}
+function register() {
+    $errName = $errEmail = $errPhone = $errPass = $errRePass = '';
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        // Validate name
+        if (empty($_POST['name'])) {
+            $errName = 'Name is not empty!';
+        }
+
+        // Validate email
+        if (empty($_POST['email'])) {
+            $errEmail = 'Email is not empty!';
+        } else if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            $errEmail = "Invalid email format!";
+        }
+
+        // Validate phone
+        if (empty($_POST['phone'])) {
+            $errPhone = 'Phone is not empty!';
+        } else if (!preg_match('/^[0-9]{10}$/', $_POST['phone'])) {
+            $errPhone = "Phone number must have 10 digits!";
+        }
+
+        // Validate password
+        if (empty($_POST['pass'])) {
+            $errPass = 'Password is not empty!';
+        }
+
+        // Validate repassword
+        if (empty($_POST['retpass'])) {
+            $errRePass = 'RePass is not empty!';
+        } else if ($_POST['pass'] != $_POST['retpass']) {
+            $errRePass = "Not match password!";
+        }
+
+        if ($errName == '' && $errEmail == '' && $errPhone == '' && $errPass == '' && $errRePass == '') {
+            $q = Database::query("
+                INSERT INTO users(name, email, phone, password, role)
+                VALUES ('".$_POST['name']."','".$_POST['email']."','".$_POST['phone']."','".$_POST['pass']."','')
+            ");
+            // Select user
+            $q = Database::query("
+                SELECT * FROM users
+                WHERE name = '".$_POST['name']."' AND password='".$_POST['pass']."'
+            ");
+            $_SESSION['user'] = $q->fetch_array();
+            header("Location: index.php");
+            exit();
+        }
+    }
+    $s = '
+    <section class="vh-100" style="background-color: #eee;">
+    <div class="container h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-lg-12 col-xl-11">
+        <div class="card text-black" style="border-radius: 25px;">
+            <div class="card-body p-md-3">
+            <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+
+                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+
+                <form class="mx-1 mx-md-4" action ="" method = "post">
+
+                    <div class="d-flex flex-row align-items-center mb-3">
+                    <i class="fas fa-user fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <label class="form-label" for="form3Example1c">Your Name</label>
+                        <input type="text" name="name" class="form-control" />
+                        <span style="color:red;"><?php echo $errName; ?></span>
+                    </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-3">
+                    <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <label class="form-label" for="form3Example3c">Your Email</label>
+                        <input type="text" name="email" class="form-control" />
+                        <span style = "color:red;"><?php echo $errEmail; ?></span>
+                    </div>
+                    </div>
+
+                     <div class="d-flex flex-row align-items-center mb-3">
+                    <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <label class="form-label" for="form3Example3c">Your Phone</label>
+                        <input type="text" name="phone" class="form-control" />
+                        <span style = "color:red;"><?php echo $errPhone; ?></span>
+                    </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-3">
+                    <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <label class="form-label" for="form3Example4c">Password</label>
+                        <input type="password" id="pass" class="form-control" />
+                        <span style = "color:red;"><?php echo $errPass; ?></span>
+                    </div>
+                    </div>
+
+                    <div class="d-flex flex-row align-items-center mb-3">
+                    <i class="fas fa-key fa-lg me-3 fa-fw"></i>
+                    <div data-mdb-input-init class="form-outline flex-fill mb-0">
+                        <label class="form-label" for="form3Example4cd">Retype password</label>
+                        <input type="password" id="retpass" class="form-control" />
+                        <span style = "color:red;"><?php echo $errRePass; ?></span>
+                    </div>
+                    </div>
+
+                    <div class="form-check d-flex justify-content-center mb-3">
+                    <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3c" />
+                    <label class="form-check-label" for="form2Example3">
+                        I agree all statements in <a href="#!">Terms of service</a>
+                    </label>
+                    </div>
+
+                    <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
+                    <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Register</button>
+                    </div>
+
+                </form>
+
+                </div>
+                <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
+
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
+                    class="img-fluid" alt="Sample image">
+
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</section>
+';
+        echo $s;
 }
 ?>
