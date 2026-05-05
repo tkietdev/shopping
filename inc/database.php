@@ -438,34 +438,23 @@ return $rs;
 }
 function register() {
     $errName = $errEmail = $errPhone = $errPass = $errRePass = '';
-
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-        // Validate name
         if (empty($_POST['name'])) {
             $errName = 'Name is not empty!';
         }
-
-        // Validate email
         if (empty($_POST['email'])) {
             $errEmail = 'Email is not empty!';
         } else if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
             $errEmail = "Invalid email format!";
         }
-
-        // Validate phone
         if (empty($_POST['phone'])) {
             $errPhone = 'Phone is not empty!';
         } else if (!preg_match('/^[0-9]{10}$/', $_POST['phone'])) {
             $errPhone = "Phone number must have 10 digits!";
         }
-
-        // Validate password
         if (empty($_POST['pass'])) {
             $errPass = 'Password is not empty!';
         }
-
-        // Validate repassword
         if (empty($_POST['retpass'])) {
             $errRePass = 'RePass is not empty!';
         } else if ($_POST['pass'] != $_POST['retpass']) {
@@ -477,7 +466,6 @@ function register() {
                 INSERT INTO users(name, email, phone, password, role)
                 VALUES ('".$_POST['name']."','".$_POST['email']."','".$_POST['phone']."','".$_POST['pass']."','')
             ");
-            // Select user
             $q = Database::query("
                 SELECT * FROM users
                 WHERE name = '".$_POST['name']."' AND password='".$_POST['pass']."'
